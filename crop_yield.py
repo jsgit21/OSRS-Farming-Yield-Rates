@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-yield_rates = {
+hops = {
     "Barley": {"reqlvl": 3,"chance1":103, "chance99": 180, "plantxp": 8.5, "harvxp": 9.5, "growtime": 40},
     "Hammerstone": {"reqlvl": 4,"chance1":104, "chance99": 180, "plantxp": 9, "harvxp": 10, "growtime": 40},
     "Asgarnian": {"reqlvl": 8,"chance1":108, "chance99": 180, "plantxp": 10.9, "harvxp": 12, "growtime": 50},
@@ -11,6 +11,7 @@ yield_rates = {
     "Wildblood": {"reqlvl": 28,"chance1":128, "chance99": 180, "plantxp": 23, "harvxp": 26, "growtime": 80},
 
 }
+
 herbs = {
     "Guam": {"reqlvl": 9,"chance1":25, "chance99":80, "plantxp": 11, "harvxp": 12.5, "growtime": 80},
     "Marrentill": {"reqlvl": 14,"chance1":28, "chance99":80, "plantxp": 13.5, "harvxp": 15, "growtime": 80},
@@ -28,24 +29,21 @@ herbs = {
     "Dwarf weed": {"reqlvl": 79,"chance1":67, "chance99":80, "plantxp": 170.5, "harvxp": 192, "growtime": 80},
     "Torstol": {"reqlvl": 85,"chance1":71, "chance99":80, "plantxp": 199.5, "harvxp": 224.5, "growtime": 80},
 }
-    # "Potato": {"reqlvl": 1,"chance1":101, "chance99": 180, "plantxp": 8, "harvxp": 9, "growtime": 40},
-    # "Onion": {"reqlvl": 5,"chance1":105, "chance99": 180, "plantxp": 9.5, "harvxp": 10.5, "growtime": 40},
-    # "Cabbage": {"reqlvl": 7,"chance1":107, "chance99": 180, "plantxp": 10, "harvxp": 11.5, "growtime": 40},
-    # "Tomato": {"reqlvl": 12,"chance1":112, "chance99": 180, "plantxp": 12.5, "harvxp": 14, "growtime": 40},
-    # "Sweetcorn": {"reqlvl": 20,"chance1":88, "chance99": 180, "plantxp": 17, "harvxp": 19, "growtime": 60},
-    # "Strawberry": {"reqlvl": 31,"chance1":103, "chance99": 180, "plantxp": 26, "harvxp": 29, "growtime": 60},
-    # "Watermelon": {"reqlvl": 47,"chance1":126, "chance99": 180, "plantxp": 48.5, "harvxp": 54.5, "growtime": 80},
-    # "Snape Grass": {"reqlvl": 61,"chance1":148, "chance99": 195, "plantxp": 82, "harvxp": 82, "growtime": 70},
 
-#     "Barley": {"reqlvl": 3,"chance1":103, "chance99": 180},
-#     "Hammerstone": {"reqlvl": 4,"chance1":104, "chance99": 180},
-#     "Asgarnian": {"reqlvl": 8,"chance1":108, "chance99": 180},
-#     "Jute": {"reqlvl": 13,"chance1":113, "chance99": 180},
-#     "Yanillian": {"reqlvl": 16,"chance1":116, "chance99": 180},
-#     "Krandorian": {"reqlvl": 21,"chance1":121, "chance99": 180},
-#     "Wildblood": {"reqlvl": 28,"chance1":128, "chance99": 180},
+allotments = {
+    "Potato": {"reqlvl": 1,"chance1":101, "chance99": 180, "plantxp": 8, "harvxp": 9, "growtime": 40},
+    "Onion": {"reqlvl": 5,"chance1":105, "chance99": 180, "plantxp": 9.5, "harvxp": 10.5, "growtime": 40},
+    "Cabbage": {"reqlvl": 7,"chance1":107, "chance99": 180, "plantxp": 10, "harvxp": 11.5, "growtime": 40},
+    "Tomato": {"reqlvl": 12,"chance1":112, "chance99": 180, "plantxp": 12.5, "harvxp": 14, "growtime": 40},
+    "Sweetcorn": {"reqlvl": 20,"chance1":88, "chance99": 180, "plantxp": 17, "harvxp": 19, "growtime": 60},
+    "Strawberry": {"reqlvl": 31,"chance1":103, "chance99": 180, "plantxp": 26, "harvxp": 29, "growtime": 60},
+    "Watermelon": {"reqlvl": 47,"chance1":126, "chance99": 180, "plantxp": 48.5, "harvxp": 54.5, "growtime": 80},
+    "Snape Grass": {"reqlvl": 61,"chance1":148, "chance99": 195, "plantxp": 82, "harvxp": 82, "growtime": 70},
+}
 
-#     "Giant seaweed": {"reqlvl": 23,"chance1":150, "chance99": 210}
+seaweed = {
+"Giant seaweed": {"reqlvl": 23,"chance1":150, "chance99": 210}
+}
 
 
 
@@ -58,7 +56,9 @@ total_lives = lives + supercompost
 
 
 def expectedYield(level, plantxp, harvxp, chance1, chance99, itembonus, diarybonus, harvestLives, growtime):
-    chanceToSave = (  (((chance1 * (99-level))/98)  + ((chance99 * (level-1))/98)) * (1+itembonus) * (1+diarybonus) + 1  ) / 256
+    chanceToSave = (  (((chance1 * (99-level))/98)  
+    + ((chance99 * (level-1))/98)) * (1+itembonus) 
+    * (1+diarybonus) + 1  ) / 256
 
     avgyield = round(harvestLives / (1 - chanceToSave),2)
     #return round(harvestLives / (1 - chanceToSave),2)
@@ -70,49 +70,41 @@ def expectedYield(level, plantxp, harvxp, chance1, chance99, itembonus, diarybon
     return round(xpPerHour,2)
 
 
+def generate_graph(crop_group):
+    for crop in crop_group:
+        print("\n" + crop + " -------------------------------------- ")
+        chance1 = crop_group[crop]["chance1"]
+        chance99 = crop_group[crop]["chance99"]
+        plantxp = crop_group[crop]["plantxp"]
+        harvxp = crop_group[crop]["harvxp"]
+        growtime = crop_group[crop]["growtime"]
+        xphr = []
+        lvls = []
+        for i in range(100):
+            if crop_group[crop]["reqlvl"] <= i:
+                xp = expectedYield(i, plantxp, harvxp, chance1, chance99, 0, 0, total_lives, growtime)
+                print(str(i) + ": " + str(xp), end="  \t")
+                xphr.append(xp)
+                lvls.append(i)
+                if i % 6 == 0:
+                    print("")
+        print("")
+        x = lvls
+        y = xphr
+        plt.plot(x, y, label=crop)
 
-for crop in yield_rates:
-    print("\n" + crop + " -------------------------------------- ")
-    chance1 = yield_rates[crop]["chance1"]
-    chance99 = yield_rates[crop]["chance99"]
-    plantxp = yield_rates[crop]["plantxp"]
-    harvxp = yield_rates[crop]["harvxp"]
-    growtime = yield_rates[crop]["growtime"]
-    xphr = []
-    lvls = []
-    for i in range(100):
-        if yield_rates[crop]["reqlvl"] <= i:
-            xp = expectedYield(i, plantxp, harvxp, chance1, chance99, 0, 0, total_lives, growtime)
-            print(str(i) + ": " + str(xp), end="  \t")
-            xphr.append(xp)
-            lvls.append(i)
-            if i % 6 == 0:
-                print("")
-    print("")
-    x = lvls
-    y = xphr
-    plt.plot(x, y, label=crop)
+    # naming the x axis
+    plt.xlabel('level')
+    # naming the y axis
+    plt.ylabel('xp/hr')
+    plt.xticks(np.arange(0, 99+1, 5.0))
+    plt.yticks(np.arange(0, 1600+1, 100.0))
+    # giving a title to my graph
+    plt.title('Hops avg xp/hr - SUPER COMPOST')
+    plt.legend()
+    
+    # function to show the plot
+    plt.show()
 
 
-# # x axis values
-# x = yield_rates["Tomato"]["xphr"]
-# # corresponding y axis values
-# y = yield_rates["Tomato"]["lvls"]
- 
-# i = yield_rates["Sweetcorn"]["xphr"]
-# j = yield_rates["Sweetcorn"]["lvls"]
-# # plotting the points
-# plt.plot(y, x, label="Tomato", color="#ED0000")
-# plt.plot(j, i, label="Sweetcorn", color="#D2A400")
-# naming the x axis
-plt.xlabel('level')
-# naming the y axis
-plt.ylabel('xp/hr')
-plt.xticks(np.arange(0, 99+1, 5.0))
-plt.yticks(np.arange(0, 500+1, 20.0))
-# giving a title to my graph
-plt.title('Hops avg xp/hr - SUPER COMPOST')
-plt.legend()
- 
-# function to show the plot
-plt.show()
+generate_graph(allotments)
