@@ -8,8 +8,14 @@ class compost(enum.Enum):
     SUPER = 2
     ULTRA = 3
 
+class itemBonus(float, enum.Enum):
+    NONE = 0
+    SECATUERS = 0.1
+    CAPE = 0.05
+    BOTH = 0.15
+
 hops = {
-    "stats": {"ymax":500, "step":30.0},
+    "stats": {"name":"Hops", "ymin":0, "ymax":500, "step":30.0},
     "crops": {
         "Barley": {"reqlvl": 3,"chance1":103, "chance99": 180, "plantxp": 8.5, "harvxp": 9.5, "growtime": 40},
         "Hammerstone": {"reqlvl": 4,"chance1":104, "chance99": 180, "plantxp": 9, "harvxp": 10, "growtime": 40},
@@ -23,7 +29,7 @@ hops = {
 }
 
 herbs = {
-    "stats": {"ymax":1500, "step":100.0},
+    "stats": {"name":"Herbs", "ymin":0, "ymax":1500, "step":100.0},
     "crops": {
         "Guam": {"reqlvl": 9,"chance1":25, "chance99":80, "plantxp": 11, "harvxp": 12.5, "growtime": 80},
         "Marrentill": {"reqlvl": 14,"chance1":28, "chance99":80, "plantxp": 13.5, "harvxp": 15, "growtime": 80},
@@ -44,7 +50,7 @@ herbs = {
 # "Goutweed": {"reqlvl": 29,"chance1":39, "chance99":80, "plantxp": 105, "harvxp": 45, "growtime": 80},
 
 allotments = {
-    "stats": {"ymax":1600, "step":100.0},
+    "stats": {"name":"Allotments", "ymin":0, "ymax":1600, "step":100.0},
     "crops": {
         "Potato": {"reqlvl": 1,"chance1":101, "chance99": 180, "plantxp": 8, "harvxp": 9, "growtime": 40},
         "Onion": {"reqlvl": 5,"chance1":105, "chance99": 180, "plantxp": 9.5, "harvxp": 10.5, "growtime": 40},
@@ -58,7 +64,7 @@ allotments = {
 }
 
 seaweed = {
-    "stats": {"ymax":1600, "step":100.0},
+    "stats": {"name":"Seaweed", "ymin":200, "ymax":1100, "step":100.0},
     "crops": {
         "Giant seaweed": {"reqlvl": 23,"chance1":150, "chance99": 210, "plantxp": 19, "harvxp": 21, "growtime": 40}
     }
@@ -77,13 +83,16 @@ def expectedYield(level, plantxp, harvxp, chance1, chance99, itembonus, diarybon
     return round(xpPerHour,2)
 
 
-def generate_graph(crop_type, compost):
+def generate_graph(crop_type, compost, itemBonus):
 
     harvest_lives = 3 + compost.value
-    crop_group = crop_type["crops"]
+
+    graph_ymin = crop_type["stats"]["ymin"]
     graph_ymax = crop_type["stats"]["ymax"]
     graph_step = crop_type["stats"]["step"]
+    graph_name = crop_type["stats"]["name"]
 
+    crop_group = crop_type["crops"]
     for crop in crop_group:
         print("\n" + crop + " -------------------------------------- ")
         chance1 = crop_group[crop]["chance1"]
@@ -95,7 +104,7 @@ def generate_graph(crop_type, compost):
         lvls = []
         for i in range(100):
             if crop_group[crop]["reqlvl"] <= i:
-                xp = expectedYield(i, plantxp, harvxp, chance1, chance99, 0, 0, harvest_lives, growtime)
+                xp = expectedYield(i, plantxp, harvxp, chance1, chance99, itemBonus, 0, harvest_lives, growtime)
                 print(str(i) + ": " + str(xp), end="  \t")
                 xphr.append(xp)
                 lvls.append(i)
@@ -111,13 +120,13 @@ def generate_graph(crop_type, compost):
     # naming the y axis
     plt.ylabel('xp/hr')
     plt.xticks(np.arange(0, 99+1, 5.0))
-    plt.yticks(np.arange(0, graph_ymax+1, graph_step))
+    plt.yticks(np.arange(graph_ymin, graph_ymax+1, graph_step))
     # giving a title to my graph
 
     if compost.value == 0:
-        plt.title("Hops avg xp/hr")
+        plt.title(graph_name + " avg xp/hr")
     else:    
-        plt.title("Hops avg xp/hr - " + compost.name + " COMPOST")
+        plt.title(graph_name + " avg xp/hr - " + compost.name + " COMPOST")
 
     plt.legend()
     
@@ -125,4 +134,4 @@ def generate_graph(crop_type, compost):
     plt.show()
 
 
-generate_graph(seaweed, compost.ULTRA)
+generate_graph(allotments, compost.ULTRA, itemBonus.NONE)
