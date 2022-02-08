@@ -31,14 +31,17 @@ herbs = {
 }
 
 allotments = {
-    "Potato": {"reqlvl": 1,"chance1":101, "chance99": 180, "plantxp": 8, "harvxp": 9, "growtime": 40},
-    "Onion": {"reqlvl": 5,"chance1":105, "chance99": 180, "plantxp": 9.5, "harvxp": 10.5, "growtime": 40},
-    "Cabbage": {"reqlvl": 7,"chance1":107, "chance99": 180, "plantxp": 10, "harvxp": 11.5, "growtime": 40},
-    "Tomato": {"reqlvl": 12,"chance1":112, "chance99": 180, "plantxp": 12.5, "harvxp": 14, "growtime": 40},
-    "Sweetcorn": {"reqlvl": 20,"chance1":88, "chance99": 180, "plantxp": 17, "harvxp": 19, "growtime": 60},
-    "Strawberry": {"reqlvl": 31,"chance1":103, "chance99": 180, "plantxp": 26, "harvxp": 29, "growtime": 60},
-    "Watermelon": {"reqlvl": 47,"chance1":126, "chance99": 180, "plantxp": 48.5, "harvxp": 54.5, "growtime": 80},
-    "Snape Grass": {"reqlvl": 61,"chance1":148, "chance99": 195, "plantxp": 82, "harvxp": 82, "growtime": 70},
+    "stats": {"ymax":1600, "step":100.0},
+    "crops": {
+        "Potato": {"reqlvl": 1,"chance1":101, "chance99": 180, "plantxp": 8, "harvxp": 9, "growtime": 40},
+        "Onion": {"reqlvl": 5,"chance1":105, "chance99": 180, "plantxp": 9.5, "harvxp": 10.5, "growtime": 40},
+        "Cabbage": {"reqlvl": 7,"chance1":107, "chance99": 180, "plantxp": 10, "harvxp": 11.5, "growtime": 40},
+        "Tomato": {"reqlvl": 12,"chance1":112, "chance99": 180, "plantxp": 12.5, "harvxp": 14, "growtime": 40},
+        "Sweetcorn": {"reqlvl": 20,"chance1":88, "chance99": 180, "plantxp": 17, "harvxp": 19, "growtime": 60},
+        "Strawberry": {"reqlvl": 31,"chance1":103, "chance99": 180, "plantxp": 26, "harvxp": 29, "growtime": 60},
+        "Watermelon": {"reqlvl": 47,"chance1":126, "chance99": 180, "plantxp": 48.5, "harvxp": 54.5, "growtime": 80},
+        "Snape Grass": {"reqlvl": 61,"chance1":148, "chance99": 195, "plantxp": 82, "harvxp": 82, "growtime": 70},
+    }
 }
 
 seaweed = {
@@ -70,7 +73,12 @@ def expectedYield(level, plantxp, harvxp, chance1, chance99, itembonus, diarybon
     return round(xpPerHour,2)
 
 
-def generate_graph(crop_group):
+def generate_graph(crop_type):
+
+    crop_group = crop_type["crops"]
+    graph_ymax = crop_type["stats"]["ymax"]
+    graph_step = crop_type["stats"]["step"]
+
     for crop in crop_group:
         print("\n" + crop + " -------------------------------------- ")
         chance1 = crop_group[crop]["chance1"]
@@ -98,7 +106,7 @@ def generate_graph(crop_group):
     # naming the y axis
     plt.ylabel('xp/hr')
     plt.xticks(np.arange(0, 99+1, 5.0))
-    plt.yticks(np.arange(0, 1600+1, 100.0))
+    plt.yticks(np.arange(0, graph_ymax+1, graph_step))
     # giving a title to my graph
     plt.title('Hops avg xp/hr - SUPER COMPOST')
     plt.legend()
