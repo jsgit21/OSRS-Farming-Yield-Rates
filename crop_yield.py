@@ -14,6 +14,10 @@ class itemBonus(float, enum.Enum):
     CAPE = 0.05
     BOTH = 0.15
 
+class graphType(enum.Enum):
+    XP = 0
+    YIELD = 1
+
 hops = {
     "stats": {"name":"Hops", "ymin":0, "ymax":500, "step":30.0},
     "crops": {
@@ -29,7 +33,7 @@ hops = {
 }
 
 herbs = {
-    "stats": {"name":"Herbs", "ymin":0, "ymax":1500, "step":100.0},
+    "stats": {"name":"Herbs", "ymin":0, "ymax":1700, "step":100.0},
     "crops": {
         "Guam": {"reqlvl": 9,"chance1":25, "chance99":80, "plantxp": 11, "harvxp": 12.5, "growtime": 80},
         "Marrentill": {"reqlvl": 14,"chance1":28, "chance99":80, "plantxp": 13.5, "harvxp": 15, "growtime": 80},
@@ -50,7 +54,11 @@ herbs = {
 # "Goutweed": {"reqlvl": 29,"chance1":39, "chance99":80, "plantxp": 105, "harvxp": 45, "growtime": 80},
 
 allotments = {
-    "stats": {"name":"Allotments", "ymin":0, "ymax":1600, "step":100.0},
+    "stats": {
+        "name":"Allotments", 
+        "XP":{"ymin":0, "ymax":1600, "step":100.0},
+        "YIELD":{"ymin":4, "ymax":27, "step":2}
+    },
     "crops": {
         "Potato": {"reqlvl": 1,"chance1":101, "chance99": 180, "plantxp": 8, "harvxp": 9, "growtime": 40},
         "Onion": {"reqlvl": 5,"chance1":105, "chance99": 180, "plantxp": 9.5, "harvxp": 10.5, "growtime": 40},
@@ -71,67 +79,76 @@ seaweed = {
 }
 
 
-def expectedYield(level, plantxp, harvxp, chance1, chance99, itembonus, diarybonus, harvestLives, growtime):
+def expectedYield(level, chance1, chance99, itembonus, diarybonus, harvestLives):
     chanceToSave = (  (((chance1 * (99-level))/98)  + ((chance99 * (level-1))/98)) * (1+itembonus) * (1+diarybonus) + 1  ) / 256
 
     avgyield = round(harvestLives / (1 - chanceToSave),2)
 
-    avgxp = plantxp + (avgyield * harvxp)
+    return avgyield
 
+
+def expectedXP(avgyield, plantxp, harvxp, growtime):
+    avgxp = plantxp + (avgyield * harvxp)
     harvestsPerHour = 60/growtime
     xpPerHour = harvestsPerHour * avgxp
     return round(xpPerHour,2)
 
-
-def generate_graph(crop_type, compost, itemBonus):
+def generate_graph(crop_type, graphType, compost, itemBonus):
 
     harvest_lives = 3 + compost.value
 
-    graph_ymin = crop_type["stats"]["ymin"]
-    graph_ymax = crop_type["stats"]["ymax"]
-    graph_step = crop_type["stats"]["step"]
     graph_name = crop_type["stats"]["name"]
+    get_stats = crop_type["stats"][graphType.name]
+    graph_ymin = get_stats["ymin"]
+    graph_ymax = get_stats["ymax"]
+    graph_step = get_stats["step"]
 
     crop_group = crop_type["crops"]
     for crop in crop_group:
-        print("\n" + crop + " -------------------------------------- ")
+        #print("\n" + crop + " -------------------------------------- ")
         chance1 = crop_group[crop]["chance1"]
         chance99 = crop_group[crop]["chance99"]
         plantxp = crop_group[crop]["plantxp"]
         harvxp = crop_group[crop]["harvxp"]
         growtime = crop_group[crop]["growtime"]
-        xphr = []
-        lvls = []
+        x_array = []
+        y_array = []
         for i in range(100):
             if crop_group[crop]["reqlvl"] <= i:
-                xp = expectedYield(i, plantxp, harvxp, chance1, chance99, itemBonus, 0, harvest_lives, growtime)
-                print(str(i) + ": " + str(xp), end="  \t")
-                xphr.append(xp)
-                lvls.append(i)
-                if i % 6 == 0:
-                    print("")
-        print("")
-        x = lvls
-        y = xphr
-        plt.plot(x, y, label=crop)
+                avgyield = expectedYield(i, chance1, chance99, itemBonus, 0, harvest_lives)
+                #print(str(i) + ": " + str(avgyield), end="  \t")
+                x_array.append(i)
 
-    # naming the x axis
-    plt.xlabel('level')
-    # naming the y axis
-    plt.ylabel('xp/hr')
+                # Default true is AVG YIELD
+                if graphType.value:
+                    y_array.append(avgyield)
+                else:
+                    xp = expectedXP(avgyield, plantxp, harvxp, growtime)
+                    y_array.append(xp)
+
+        #         if i % 6 == 0:
+        #             print("")
+        # print("")
+        plt.plot(x_array, y_array, label=crop)
+
+    plt.xlabel('LEVEL')
+    plt.ylabel('XP / HR')
     plt.xticks(np.arange(0, 99+1, 5.0))
     plt.yticks(np.arange(graph_ymin, graph_ymax+1, graph_step))
-    # giving a title to my graph
 
     if compost.value == 0:
-        plt.title(graph_name + " avg xp/hr")
-    else:    
-        plt.title(graph_name + " avg xp/hr - " + compost.name + " COMPOST")
+        if graphType.value:
+            plt.title(graph_name + " avg yield")
+        else:
+            plt.title(graph_name + " avg xp/hr")
+    else:
+        if graphType.value:
+            plt.title(graph_name + " avg yield - "+ compost.name + " COMPOST")
+        else:
+            plt.title(graph_name + " avg xp/hr - " + compost.name + " COMPOST")
 
     plt.legend()
-    
-    # function to show the plot
     plt.show()
 
 
-generate_graph(allotments, compost.ULTRA, itemBonus.NONE)
+generate_graph(allotments, graphType.YIELD, compost.ULTRA, itemBonus.NONE)
