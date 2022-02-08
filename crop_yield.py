@@ -19,7 +19,11 @@ class graphType(enum.Enum):
     YIELD = 1
 
 hops = {
-    "stats": {"name":"Hops", "ymin":0, "ymax":500, "step":30.0},
+    "stats": {
+        "name":"Hops", 
+        "XP": {"ymin":0, "ymax":500, "step":30.0},
+        "YIELD": {"ymin":4, "ymax":20, "step":2}
+    },
     "crops": {
         "Barley": {"reqlvl": 3,"chance1":103, "chance99": 180, "plantxp": 8.5, "harvxp": 9.5, "growtime": 40},
         "Hammerstone": {"reqlvl": 4,"chance1":104, "chance99": 180, "plantxp": 9, "harvxp": 10, "growtime": 40},
@@ -33,7 +37,11 @@ hops = {
 }
 
 herbs = {
-    "stats": {"name":"Herbs", "ymin":0, "ymax":1700, "step":100.0},
+    "stats": {
+        "name":"Herbs",
+        "XP": {"ymin":0, "ymax":1700, "step":100.0},
+        "YIELD":{"ymin":4, "ymax":20, "step":2}
+    },
     "crops": {
         "Guam": {"reqlvl": 9,"chance1":25, "chance99":80, "plantxp": 11, "harvxp": 12.5, "growtime": 80},
         "Marrentill": {"reqlvl": 14,"chance1":28, "chance99":80, "plantxp": 13.5, "harvxp": 15, "growtime": 80},
@@ -72,7 +80,11 @@ allotments = {
 }
 
 seaweed = {
-    "stats": {"name":"Seaweed", "ymin":200, "ymax":1100, "step":100.0},
+    "stats": {
+        "name":"Seaweed", 
+        "XP":{"ymin":200, "ymax":1100, "step":100.0},
+        "YIELD":{"ymin":4, "ymax":27, "step":2}
+    },
     "crops": {
         "Giant seaweed": {"reqlvl": 23,"chance1":150, "chance99": 210, "plantxp": 19, "harvxp": 21, "growtime": 40}
     }
@@ -132,23 +144,26 @@ def generate_graph(crop_type, graphType, compost, itemBonus):
         plt.plot(x_array, y_array, label=crop)
 
     plt.xlabel('LEVEL')
-    plt.ylabel('XP / HR')
     plt.xticks(np.arange(0, 99+1, 5.0))
     plt.yticks(np.arange(graph_ymin, graph_ymax+1, graph_step))
 
     if compost.value == 0:
         if graphType.value:
             plt.title(graph_name + " avg yield")
+            plt.ylabel('YIELD')
         else:
             plt.title(graph_name + " avg xp/hr")
+            plt.ylabel('XP / HR')
     else:
         if graphType.value:
             plt.title(graph_name + " avg yield - "+ compost.name + " COMPOST")
+            plt.ylabel('YIELD')
         else:
             plt.title(graph_name + " avg xp/hr - " + compost.name + " COMPOST")
+            plt.ylabel('XP / HR')
 
     plt.legend()
     plt.show()
 
 
-generate_graph(allotments, graphType.YIELD, compost.ULTRA, itemBonus.NONE)
+generate_graph(allotments, graphType.XP, compost.ULTRA, itemBonus.NONE)
